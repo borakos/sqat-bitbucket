@@ -1,0 +1,32 @@
+{
+	"static_page_tests": [
+		{
+			"url": "https://bitbucket.org/",
+			"title_check": "Bitbucket | The Git solution for professional teams",
+			"body_check": "Bitbucket is more than just Git code management. Bitbucket gives teams one place to plan projects, collaborate on code, test, and deploy."
+		},
+		{
+			"url": "https://bitbucket.org/product/",
+			"title_check": "Bitbucket | The Git solution for professional teams",
+			"body_check": "Bitbucket is more than just Git code management. Bitbucket gives teams one place to plan projects, collaborate on code, test, and deploy."
+		},
+		{
+			"url": "https://bitbucket.org/product/enterprise/",
+			"title_check": "Bitbucket Server and Data Center | Bitbucket",
+			"body_check": "Bitbucket Data Center is a self-managed solution that provides source code collaboration for professional teams of any size, across any distance"
+		},
+		{
+			"url": "https://www.atlassian.com/software/bitbucket/pricing/",
+			"title_check": "Bitbucket - Pricing | Atlassian",
+			"body_check": "Plans and pricing"
+		}
+	],
+	"credentials": {
+		"username": "wawopi8538@whipjoy.com",
+		"password": "sqat21_late"
+	},
+	"repos": {
+		"random_repos_per_iteration": 3,
+		"repo_download_limit": 3
+	}
+}
