@@ -21,6 +21,8 @@ import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+
 
 public class RepositoryPage extends PageBase {
 
@@ -75,9 +77,13 @@ public class RepositoryPage extends PageBase {
 			WebElement downloadPageLink = getDownloadPageLinkElement();
 			if(downloadPageLink != null){
 				downloadPageLink.click();
-				String destinationPath = repoConfig.getString("download_destination") + "\\" + entry.getKey() + ".zip";
+				String destinationPath = repoConfig.getString("download_destination");
+				File directory = new File(destinationPath);
+				if (!directory.exists()){
+					directory.mkdir();
+				}
+				destinationPath += "\\" + entry.getKey() + ".zip";
 				downloadFromLink(destinationPath, getDownloadLink());
-				//System.out.println(getDownloadLink());
 			}
     	}
 	}
@@ -160,5 +166,17 @@ public class RepositoryPage extends PageBase {
 			download.put(key, repos.get(key));
 		}
 		return download;
+	}
+
+	public Map<String, String> generateRandomRepos(){
+		Map<String, String> repoDescriptions = new HashMap<String, String>();
+		JSONObject repos = Store.getInstance().configContent.getJSONObject("repos");
+		for(int i = 0; i < repos.getInt("random_repos_per_iteration"); i++){
+			String repoName = Store.getInstance().getRandomString(10);
+			String repoDescription = Store.getInstance().getRandomString(50);
+			repoDescriptions.put(repoName, repoDescription);
+			createRepository(repoName, repoDescription);
+		}
+		return repoDescriptions;
 	}
 }

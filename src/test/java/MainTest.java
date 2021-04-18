@@ -63,7 +63,7 @@ public class MainTest{
     }
 
 
-	/*@Test
+	@Test
     public void AuthenticantedTest(){
 		LoginPage loginPage = new LoginPage(this.driver);
 		JSONObject credentials = Store.getInstance().configContent.getJSONObject("credentials");
@@ -71,32 +71,22 @@ public class MainTest{
 
 		RepositoryPage repositoryPage = mainPage.openRepositoriesPage();
 
-		List<String> repoNames = new ArrayList<>();
-		List<String> repoDescriptions = new ArrayList<>();
-		JSONObject repos = Store.getInstance().configContent.getJSONObject("repos");
-		for(int i = 0; i < repos.getInt("random_repos_per_iteration"); i++){
-			String repoName = Store.getInstance().getRandomString(10);
-			repoNames.add(repoName);
-			String repoDescription = Store.getInstance().getRandomString(50);
-			repoDescriptions.add(repoDescription);
-			repositoryPage.createRepository(repoName, repoDescription);
-		}
+		Map<String, String> repoDescriptions = repositoryPage.generateRandomRepos();
 
 		repositoryPage.waitForReposToLoad();
-		try{
-			Thread.sleep(2000);
-		}catch(Exception exc){}
-		String reposList = repositoryPage.getBodyText();
-		for(int i = 0; i < repos.getInt("random_repos_per_iteration"); i++){
-			Assert.assertTrue(reposList.contains(repoNames.get(i)));
-			Assert.assertTrue(reposList.contains(repoDescriptions.get(i)));
-		}
 
+		String repoList = repositoryPage.getBodyText();
+		for(Map.Entry<String,String> entry : repoDescriptions.entrySet()){
+			Assert.assertTrue(repoList.contains(entry.getKey()));
+			Assert.assertTrue(repoList.contains(entry.getValue()));
+    	}
+
+		JSONObject repos = Store.getInstance().configContent.getJSONObject("repos");
 		repositoryPage.downloadRepos(repos.getJSONArray("repos_to_download"), repos.getInt("random_repo_download_limit"));
-		System.out.println("Logout");
+	
 		LogoutPage logoutPage = mainPage.logout();
 		logoutPage.submitLogout();
-    }*/
+    }
     
     @After
     public void close(){
