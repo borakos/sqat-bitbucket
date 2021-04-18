@@ -26,6 +26,11 @@ public class PageBase {
         this.wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
         return this.driver.findElement(locator);
     } 
+
+	protected List<WebElement> waitAndReturnElements(By locator) {
+        this.wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return this.driver.findElements(locator);
+    } 
     
     public String getBodyText() {
         WebElement bodyElement = this.waitAndReturnElement(By.tagName("body"));
@@ -35,4 +40,14 @@ public class PageBase {
 	public String getTitleText() {
         return this.driver.getTitle();
     }
+
+	public void back(){
+		this.driver.navigate().back();
+	}
+
+	public void backWith(int backStep){
+		for(int i = 0; i < backStep; i++){
+			back();
+		}
+	}
 }

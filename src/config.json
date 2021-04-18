@@ -26,7 +26,17 @@
 		"password": "sqat21_late"
 	},
 	"repos": {
-		"random_repos_per_iteration": 3,
-		"repo_download_limit": 3
+		"random_repos_per_iteration": 0,
+		"random_repo_download_limit": 2,
+		"repos_to_download": [
+			"teszt"
+		],
+		"download_destination": ".\\downloads"
+	},
+	"config":{
+		"driver": "chrome",
+		"driver_version": "",
+		"op_system": "",
+		"arch_version": ""
 	}
 }

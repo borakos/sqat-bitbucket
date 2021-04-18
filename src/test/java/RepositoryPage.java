@@ -11,6 +11,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import java.util.*;  
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.net.URL;
+import java.net.URLConnection;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class RepositoryPage extends PageBase {
@@ -50,5 +59,106 @@ public class RepositoryPage extends PageBase {
 
 	private void returnToRepoIndex(){
 		driver.get("https://bitbucket.org/dashboard/repositories");
+	}
+
+	public void waitForReposToLoad(){
+		By tableLocator = By.xpath("//table[@class='css-1yq88hf edylmxf0']");
+		this.waitAndReturnElement(tableLocator);
+	}
+
+	public void downloadRepos(JSONArray repoNames, int randomReposCount){
+		Map<String, String> repos = reposToDownload(getRepoLinks(), repoNames, randomReposCount);
+		JSONObject repoConfig = Store.getInstance().configContent.getJSONObject("repos");
+
+		for(Map.Entry<String, String> entry : repos.entrySet()){
+			driver.get(entry.getValue());
+			WebElement downloadPageLink = getDownloadPageLinkElement();
+			if(downloadPageLink != null){
+				downloadPageLink.click();
+				String destinationPath = repoConfig.getString("download_destination") + "\\" + entry.getKey() + ".zip";
+				downloadFromLink(destinationPath, getDownloadLink());
+				//System.out.println(getDownloadLink());
+			}
+    	}
+	}
+
+	private String getAuthorizationToken(){
+		JSONObject credentials = Store.getInstance().configContent.getJSONObject("credentials");
+		String userPass = credentials.getString("username") + ":" + credentials.getString("password");
+		return "Basic " + new String(Base64.getEncoder().encode(userPass.getBytes()));
+	}
+
+	private void downloadFromLink(String path, String urlPath){
+		try {
+			URL url = new URL(urlPath);
+			URLConnection connection = url.openConnection();
+			connection.setRequestProperty("Authorization", getAuthorizationToken());
+			
+			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+			FileOutputStream fileOutputStream = new FileOutputStream(path);
+			byte dataBuffer[] = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+				fileOutputStream.write(dataBuffer, 0, bytesRead);
+			}
+			fileOutputStream.close();
+		} catch (IOException exc) {
+			System.out.println(exc.getStackTrace());
+		}
+	}
+
+	private String getDownloadLink(){
+		By locator = By.xpath("//tr[@class='download-repo']/td/a[@class='lfs-warn-link']");
+		WebElement item = this.waitAndReturnElement(locator);
+		return item.getAttribute("href");
+	}
+
+	private WebElement getDownloadPageLinkElement(){
+		By locator = By.xpath("//div[@role='presentation']/a[@data-testid='NavigationItem']");
+		List<WebElement> items = this.waitAndReturnElements(locator);
+		int i = 0;
+		while((i < items.size()) && !items.get(i).getAttribute("href").contains("downloads")){
+			i++;
+		}
+		return i < items.size() ? items.get(i) : null;
+	}
+
+	private Map<String, String> getRepoLinks(){
+		Map<String, String> map = new HashMap<String, String>();
+		By locator = By.xpath("//span[@class='css-1ezm1k2 e1b5og4v0']/a[@target='_self']");
+		List<WebElement> items = this.waitAndReturnElements(locator);
+		for(int i = 0; i < items.size(); i++){
+			if(!items.get(i).getText().trim().isEmpty()){
+				map.put(items.get(i).getText(), items.get(i).getAttribute("href"));
+			}
+		}
+		return map;
+	}
+
+	private Map<String, String> reposToDownload(Map<String, String> repos, JSONArray repoNames, int randomReposCount){
+		List<String> names = new ArrayList<>();
+		Map<String, String> download = new HashMap<String, String>();
+		Random random = new Random();
+
+		for(int i = 0; i < repoNames.length(); i++){
+			String key = (String) repoNames.get(i);
+			if(repos.containsKey(key)){
+				download.put(key, repos.get(key));
+				repos.remove(key);
+			}
+		}
+
+		for(Map.Entry<String,String> entry : repos.entrySet()){
+			names.add(entry.getKey());
+    	}
+
+		int lenght = randomReposCount > names.size() ? names.size() : randomReposCount;
+		for(int i = 0; i < lenght; i++){
+			int index  = random.nextInt(names.size());
+			String key = names.get(index);
+			names.remove(index);
+			download.put(key, repos.get(key));
+		}
+		return download;
 	}
 }
